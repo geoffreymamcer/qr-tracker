@@ -29,7 +29,7 @@ redirects to your real link. The person scanning never notices.
 ## Deploy to Vercel
 
 1. In Vercel, go to **Add New → Project**, import this GitHub repo, and click **Deploy**
-   (no build settings to change; `vercel.json` handles routing).
+   (no build settings to change; Vercel detects the Flask `app` in `app.py`).
 2. Open the project, go to **Storage**, choose **Neon (Postgres)**, create a free database, and connect it
    to the project. That sets `DATABASE_URL` for you.
 3. In **Settings → Environment Variables**, add:
@@ -65,5 +65,4 @@ visitors. Set your own `QR_SALT` environment variable in production.
 
 - `app.py`: the whole app (Flask; Postgres when `DATABASE_URL` is set, SQLite otherwise)
 - `templates/`: the pages
-- `api/index.py` + `vercel.json`: Vercel entry point and routing
 - Logos are stored in the database, so nothing depends on the server's disk
