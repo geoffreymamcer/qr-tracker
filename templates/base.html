@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}QR Tracker{% endblock %}</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#16181d; --muted:#6b7280; --line:#e5e7eb;
+          --accent:#2563eb; --accent-soft:#dbeafe; --danger:#dc2626; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         background:var(--bg); color:var(--ink); line-height:1.5; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; }
+  header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  header a { color:inherit; text-decoration:none; font-weight:700; font-size:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:20px; }
+  h2 { margin:0 0 14px; font-size:17px; }
+  label { display:block; font-size:13px; font-weight:600; margin:12px 0 4px; }
+  input[type=text], input[type=url] { width:100%; padding:10px 12px; border:1px solid var(--line);
+         border-radius:8px; font-size:15px; }
+  input[type=color] { width:52px; height:36px; border:1px solid var(--line); border-radius:8px; padding:2px; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; }
+  .btn { display:inline-block; background:var(--accent); color:#fff; border:0; border-radius:8px;
+         padding:10px 16px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; }
+  .btn.ghost { background:var(--accent-soft); color:var(--accent); }
+  .btn.danger { background:transparent; color:var(--danger); border:1px solid var(--line); }
+  .muted { color:var(--muted); font-size:13px; }
+  .error { background:#fee2e2; color:#991b1b; padding:10px 12px; border-radius:8px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
+  th { font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em; }
+  .num { font-variant-numeric: tabular-nums; }
+  .truncate { max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .table-wrap { overflow-x:auto; }
+</style>
+</head>
+<body><div class="wrap">
+<header><a href="{{ url_for('index') }}">▦ QR Tracker</a></header>
+{% if no_persistent_db %}
+<p class="error"><strong>No database connected.</strong> Codes and scans will disappear.
+In Vercel, open this project → Storage → connect a Postgres (Neon) database, then redeploy.</p>
+{% endif %}
+{% block content %}{% endblock %}
+</div></body>
+</html>

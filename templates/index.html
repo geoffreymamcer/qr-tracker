@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Create a QR code</h2>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" enctype="multipart/form-data">
+    <label for="url">Link</label>
+    <input id="url" name="url" type="text" placeholder="https://example.com" required>
+
+    <label for="name">Name (optional, for your own reference)</label>
+    <input id="name" name="name" type="text" placeholder="e.g. Flyer – November promo">
+
+    <div class="row">
+      <div>
+        <label for="logo">Logo (optional, PNG/JPG/WEBP)</label>
+        <input id="logo" name="logo" type="file" accept="image/*">
+      </div>
+      <div><label for="fg">Code color</label><input id="fg" name="fg" type="color" value="#000000"></div>
+      <div><label for="bg">Background</label><input id="bg" name="bg" type="color" value="#ffffff"></div>
+    </div>
+    <p class="muted">Tip: keep strong contrast between the two colors (dark code on light background) so every phone can scan it.</p>
+    <button class="btn" type="submit">Generate QR code</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Your QR codes</h2>
+  {% if codes %}
+  <div class="table-wrap"><table>
+    <tr><th>Name / link</th><th>Scans</th><th>Unique</th><th>Last scan (UTC)</th><th></th></tr>
+    {% for c in codes %}
+    <tr>
+      <td class="truncate"><strong>{{ c.name or c.slug }}</strong><br>
+          <span class="muted">{{ c.target_url }}</span></td>
+      <td class="num">{{ c.total }}</td>
+      <td class="num">{{ c.uniques }}</td>
+      <td class="muted">{{ (c.last_scan or '—')[:16].replace('T',' ') }}</td>
+      <td><a class="btn ghost" href="{{ url_for('stats', slug=c.slug) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}
+  <p class="muted">No QR codes yet — create one above.</p>
+  {% endif %}
+</div>
+{% endblock %}

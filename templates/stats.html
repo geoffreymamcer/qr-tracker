@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ code.name or code.slug }} · QR Tracker{% endblock %}
+{% block content %}
+<style>
+  .top { display:grid; grid-template-columns: 240px 1fr; gap:20px; }
+  @media (max-width: 700px) { .top { grid-template-columns: 1fr; } }
+  .qr img { width:100%; max-width:240px; border-radius:10px; border:1px solid var(--line); display:block; }
+  .stats { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin:12px 0 16px; }
+  .stat { background:var(--bg); border-radius:10px; padding:12px; }
+  .stat b { display:block; font-size:26px; font-variant-numeric: tabular-nums; }
+  .chart { display:flex; align-items:flex-end; gap:3px; height:140px; padding-top:8px; }
+  .bar { flex:1; background:var(--accent); border-radius:3px 3px 0 0; min-height:2px; position:relative; }
+  .bar:hover::after { content: attr(data-tip); position:absolute; bottom:100%; left:50%;
+      transform:translateX(-50%); background:var(--ink); color:#fff; font-size:11px;
+      padding:3px 6px; border-radius:4px; white-space:nowrap; margin-bottom:4px; }
+  .axis { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:4px; }
+  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; }
+  @media (max-width: 700px) { .grid3 { grid-template-columns: 1fr; } }
+  .brk { display:flex; justify-content:space-between; font-size:14px; margin:6px 0 2px; }
+  .track { height:6px; background:var(--accent-soft); border-radius:3px; }
+  .track span { display:block; height:100%; background:var(--accent); border-radius:3px; }
+  code { background:var(--bg); padding:2px 6px; border-radius:4px; word-break:break-all; }
+</style>
+
+<div class="card top">
+  <div class="qr">
+    <img src="{{ url_for('qr_png', slug=code.slug) }}" alt="QR code">
+    <p style="margin-top:12px"><a class="btn" href="{{ url_for('qr_png', slug=code.slug, download=1) }}">Download PNG</a></p>
+  </div>
+  <div>
+    <h2 style="margin-bottom:4px">{{ code.name or code.slug }}</h2>
+    <p class="muted" style="margin:0">Goes to <a href="{{ code.target_url }}" target="_blank" rel="noopener">{{ code.target_url }}</a></p>
+    <p class="muted" style="margin:4px 0 0">Tracking link inside the QR: <code>{{ short_url }}</code></p>
+
+    <div class="stats">
+      <div class="stat"><span class="muted">Total scans</span><b>{{ totals.total }}</b></div>
+      <div class="stat"><span class="muted">Unique scanners</span><b>{{ totals.uniques }}</b></div>
+      <div class="stat"><span class="muted">Last scan (UTC)</span>
+        <b style="font-size:15px;padding-top:8px">{{ (totals.last_scan or '—')[:16].replace('T',' ') }}</b></div>
+    </div>
+
+    <span class="muted">Scans per day — last 30 days</span>
+    <div class="chart">
+      {% for d in daily %}
+      <div class="bar" style="height:{{ (d.n / max_day * 100)|round(1) }}%" data-tip="{{ d.day }}: {{ d.n }}"></div>
+      {% endfor %}
+    </div>
+    <div class="axis"><span>{{ daily[0].day }}</span><span>{{ daily[-1].day }}</span></div>
+  </div>
+</div>
+
+<div class="card grid3">
+  {% for title, key in [('Device','device'), ('Operating system','os'), ('Browser / app','browser')] %}
+  <div>
+    <h2>{{ title }}</h2>
+    {% for r in breakdown[key] %}
+      <div class="brk"><span>{{ r.label }}</span><span class="num">{{ r.n }}</span></div>
+      <div class="track"><span style="width:{{ (r.n / totals.total * 100)|round(1) }}%"></span></div>
+    {% else %}<p class="muted">No scans yet.</p>{% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2>Recent scans</h2>
+  {% if recent %}
+  <div class="table-wrap"><table>
+    <tr><th>Time (UTC)</th><th>Device</th><th>OS</th><th>Browser</th><th>Visitor</th></tr>
+    {% for s in recent %}
+    <tr><td>{{ s.scanned_at[:19].replace('T',' ') }}</td><td>{{ s.device }}</td><td>{{ s.os }}</td>
+        <td>{{ s.browser }}</td><td class="muted">{{ s.visitor[:8] }}</td></tr>
+    {% endfor %}
+  </table></div>
+  {% else %}
+  <p class="muted">Nobody has scanned this code yet. Scan it with your phone to test.</p>
+  {% endif %}
+</div>
+
+<form method="post" action="{{ url_for('delete', slug=code.slug) }}"
+      onsubmit="return confirm('Delete this QR code and all its scan data?')">
+  <button class="btn danger" type="submit">Delete this QR code</button>
+</form>
+{% endblock %}
