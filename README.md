@@ -2,6 +2,10 @@
 
 Turn any link into a QR code, put your logo in the middle, and see how many people scan it.
 
+People sign up with an email and password. A QR code belongs to the account that made it:
+only that account can see its statistics, download its image, or delete it. Scanning a
+code never needs an account.
+
 ## Run it
 
 ```bash
@@ -9,7 +13,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open http://localhost:5000, paste a link, optionally upload a logo, and click **Generate**.
+Open http://localhost:5000, create an account, paste a link, optionally upload a logo, and click **Create QR code**.
 
 ## How the scan tracking works
 
@@ -53,6 +57,18 @@ SQLite file instead.
 
 Raw IP addresses are never stored — only a salted hash used to count unique
 visitors. Set your own `QR_SALT` environment variable in production.
+
+## Accounts and security
+
+- Passwords are stored hashed (PBKDF2-SHA256), never in readable form.
+- Statistics, QR images and delete are limited to the account that created the code.
+  Anyone else gets "Page not found".
+- Every form carries a per-session token, so other websites can't submit forms for a logged-in user.
+- After 10 failed log-ins in 15 minutes, further attempts from that address are paused.
+- The key that signs log-in cookies is created automatically and kept in the database.
+  To manage it yourself, set a `SECRET_KEY` environment variable.
+- Codes made before accounts existed are given to the **first account that signs up**.
+- There is no password reset or email verification yet; both need an email-sending service.
 
 ## Logo tips
 

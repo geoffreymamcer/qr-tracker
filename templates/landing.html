@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}QR Tracker: QR codes that count their scans{% endblock %}
+{% block style %}
+  .hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 56px;
+          align-items: center; padding-top: 64px; padding-bottom: 72px; }
+  .hero h1 { font-size: clamp(2.3rem, 5.6vw, 3.9rem); line-height: 1.02; letter-spacing: -0.025em; }
+  .hero .lede { font-size: 1.15rem; color: var(--muted); max-width: 34em; margin-top: 20px; }
+  .hero .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+
+  /* the sample code sits inside a camera viewfinder */
+  .finder { position: relative; width: 100%; max-width: 340px; margin: 0 auto; padding: 22px;
+            background: var(--paper); }
+  .finder img { display: block; width: 100%; height: auto; }
+  .finder .corner { position: absolute; width: 44px; height: 44px; border: 5px solid var(--pine); }
+  .finder .tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+  .finder .tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+  .finder .bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+  .finder .br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+  .finder .beam { position: absolute; left: 14px; right: 14px; top: 10%; height: 4px;
+                  background: var(--signal); border-radius: 2px; opacity: 0;
+                  animation: sweep 1.9s ease-in-out 0.5s 1 both; }
+  @keyframes sweep {
+    0% { top: 10%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 88%; opacity: 0; }
+  }
+  .finder-note { text-align: center; margin-top: 14px; font-size: 0.9rem; color: var(--muted); }
+
+  .band { background: var(--paper); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .section { padding-top: 56px; padding-bottom: 56px; }
+  .section > h2 { font-size: clamp(1.5rem, 3vw, 1.9rem); font-weight: 700; max-width: 22em; }
+  .section > .intro { color: var(--muted); max-width: 40em; margin-top: 10px; }
+
+  .steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid;
+           grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; counter-reset: step; }
+  .steps li { counter-increment: step; }
+  .steps li::before { content: counter(step); display: grid; place-items: center; width: 40px; height: 40px;
+                      border: 4px solid var(--pine); border-radius: 6px; color: var(--pine);
+                      font: 700 1.05rem var(--display); margin-bottom: 14px; }
+  .steps p { color: var(--muted); margin-top: 6px; }
+
+
+  .closing { text-align: center; }
+  .band.last { border-bottom: 0; }
+  .foot { margin-top: 0; }
+  .closing h2 { margin: 0 auto; }
+  .closing .actions { margin-top: 22px; }
+
+  @media (max-width: 820px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 40px; padding-bottom: 48px; }
+    .steps { grid-template-columns: 1fr; gap: 24px; }
+  }
+{% endblock %}
+{% block content %}
+<section class="wrap hero">
+  <div>
+    <h1>Know how many people scanned your QR code</h1>
+    <p class="lede">Turn any link into a QR code with your logo in the middle. Every scan is counted,
+      so you can see which flyer, poster or post brought people in.</p>
+    <div class="actions">
+      <a class="btn" href="{{ url_for('signup') }}">Create an account</a>
+      <a class="btn quiet" href="{{ url_for('login') }}">Log in</a>
+    </div>
+  </div>
+  <div>
+    <div class="finder">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <img src="{{ url_for('sample_qr') }}" width="340" height="340"
+           alt="Sample QR code with a logo in the center">
+      <span class="beam" aria-hidden="true"></span>
+    </div>
+    <p class="finder-note">This one is real. Point your phone camera at it and it opens this page.</p>
+  </div>
+</section>
+
+<div class="band">
+  <section class="wrap section">
+    <h2>From link to printed code in three steps</h2>
+    <ol class="steps">
+      <li><h3>Paste your link</h3>
+        <p>A website, a menu, a sign-up form, a social page. Any link works.</p></li>
+      <li><h3>Add your logo and colors</h3>
+        <p>Your logo goes in the center, and the code is built so it still scans cleanly.</p></li>
+      <li><h3>Print it and watch the scans</h3>
+        <p>Download the image, put it anywhere, and check your page to see who scanned it and when.</p></li>
+    </ol>
+  </section>
+</div>
+
+<section class="wrap section" id="privacy">
+  <h2>What gets recorded, and what doesn't</h2>
+  <p class="intro">Your statistics are private. Only the account that made a QR code can see its numbers or delete it.</p>
+  {% include "_privacy.html" %}
+</section>
+
+<div class="band last">
+  <section class="wrap section closing">
+    <h2>Make your first QR code</h2>
+    <div class="actions"><a class="btn" href="{{ url_for('signup') }}">Create an account</a></div>
+  </section>
+</div>
+{% endblock %}

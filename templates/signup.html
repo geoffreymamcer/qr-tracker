@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Create an account · QR Tracker{% endblock %}
+{% block style %}
+  .auth { max-width: 440px; padding-top: 48px; }
+  .auth .sub { color: var(--muted); margin-top: 8px; }
+  .auth .panel { margin-top: 24px; }
+  .auth .panel .notice { margin-bottom: 4px; }
+  .auth .btn { margin-top: 22px; }
+  .auth .switch { margin-top: 18px; text-align: center; }
+{% endblock %}
+{% block content %}
+<section class="wrap auth">
+  <h1>Create an account</h1>
+  <p class="sub">Your QR codes and their statistics stay private to this account.</p>
+  <form class="panel" method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ email }}" autocomplete="email" required autofocus>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password"
+             minlength="{{ password_min }}" required aria-describedby="pw-hint">
+      <p class="hint" id="pw-hint">At least {{ password_min }} characters. Write it down somewhere safe:
+        there is no password reset yet.</p>
+    </div>
+    <div class="field">
+      <label for="confirm">Repeat password</label>
+      <input id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+    </div>
+    <button class="btn wide" type="submit">Create account</button>
+  </form>
+  <p class="switch small">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+</section>
+{% endblock %}

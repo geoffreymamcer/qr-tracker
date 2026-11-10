@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Log in · QR Tracker{% endblock %}
+{% block style %}
+  .auth { max-width: 440px; padding-top: 48px; }
+  .auth .sub { color: var(--muted); margin-top: 8px; }
+  .auth .panel { margin-top: 24px; }
+  .auth .panel .notice { margin-bottom: 4px; }
+  .auth .btn { margin-top: 22px; }
+  .auth .switch { margin-top: 18px; text-align: center; }
+{% endblock %}
+{% block content %}
+<section class="wrap auth">
+  <h1>Log in</h1>
+  <p class="sub">See your QR codes and how many times each one was scanned.</p>
+  <form class="panel" method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ email }}" autocomplete="email" required autofocus>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn wide" type="submit">Log in</button>
+  </form>
+  <p class="switch small">New here? <a href="{{ url_for('signup') }}">Create an account</a></p>
+</section>
+{% endblock %}

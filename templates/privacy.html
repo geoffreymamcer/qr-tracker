@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}What gets recorded · QR Tracker{% endblock %}
+{% block style %}
+  .page { padding-top: 40px; }
+  .page .intro { color: var(--muted); max-width: 40em; margin-top: 10px; }
+{% endblock %}
+{% block content %}
+<section class="wrap page">
+  <h1>What gets recorded, and what doesn't</h1>
+  <p class="intro">Your statistics are private. Only the account that made a QR code can see its numbers or delete it.</p>
+  {% include "_privacy.html" %}
+</section>
+{% endblock %}

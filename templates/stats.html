@@ -1,83 +1,146 @@
 {% extends "base.html" %}
 {% block title %}{{ code.name or code.slug }} · QR Tracker{% endblock %}
+{% block style %}
+  .stats-page { padding-top: 28px; }
+  .back { font-size: 0.9rem; font-weight: 600; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .title { margin-top: 12px; }
+  .title h1 { overflow-wrap: anywhere; }
+  .title p { margin-top: 6px; overflow-wrap: anywhere; }
+
+  .top { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; margin-top: 24px; align-items: start; }
+  .qr img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 4px; }
+  .qr .btn { margin-top: 14px; }
+  .qr .link { margin-top: 14px; font-size: 0.85rem; color: var(--muted); }
+  .qr code { display: block; margin-top: 4px; padding: 8px 10px; background: var(--tint); border-radius: 4px;
+             font: 500 0.85rem var(--body); color: var(--ink); overflow-wrap: anywhere; }
+
+  .figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0;
+             border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+  .figure { padding: 18px 20px; border-left: 1px solid var(--line); }
+  .figure:first-child { border-left: 0; }
+  .figure .label { font-weight: 500; font-size: 0.875rem; color: var(--muted); margin-bottom: 4px; }
+  .figure .value { font: 700 2.1rem/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .figure .value.when { font: 600 1.05rem/1.3 var(--body); padding-top: 8px; }
+
+  .chart-panel { margin-top: 20px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 150px; margin-top: 18px;
+           border-bottom: 1px solid var(--line); }
+  .bar { flex: 1; min-width: 0; background: var(--pine); border-radius: 2px 2px 0 0; min-height: 2px; }
+  .bar.zero { background: var(--line); }
+  .bar:hover { background: var(--signal); }
+  .axis { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+
+  .breakdowns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 20px; }
+  .brk { display: flex; justify-content: space-between; gap: 12px; font-size: 0.95rem; margin: 12px 0 5px; }
+  .track { height: 8px; background: var(--tint); border-radius: 2px; }
+  .track span { display: block; height: 100%; background: var(--pine); border-radius: 2px; }
+
+  .recent { margin-top: 20px; }
+  .table-wrap { overflow-x: auto; margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.925rem; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-weight: 600; font-size: 0.85rem; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+
+  .remove { margin-top: 20px; display: flex; justify-content: space-between; align-items: center;
+            gap: 16px; flex-wrap: wrap; }
+  .remove p { color: var(--muted); font-size: 0.9rem; max-width: 34em; margin-top: 4px; }
+  .remove form { margin: 0; }
+
+  @media (max-width: 760px) {
+    .top { grid-template-columns: 1fr; }
+    .qr img { max-width: 260px; }
+    .breakdowns { grid-template-columns: 1fr; gap: 20px; }
+    .figures { grid-template-columns: 1fr; }
+    .figure { border-left: 0; border-top: 1px solid var(--line); }
+    .figure:first-child { border-top: 0; }
+  }
+{% endblock %}
 {% block content %}
-<style>
-  .top { display:grid; grid-template-columns: 240px 1fr; gap:20px; }
-  @media (max-width: 700px) { .top { grid-template-columns: 1fr; } }
-  .qr img { width:100%; max-width:240px; border-radius:10px; border:1px solid var(--line); display:block; }
-  .stats { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin:12px 0 16px; }
-  .stat { background:var(--bg); border-radius:10px; padding:12px; }
-  .stat b { display:block; font-size:26px; font-variant-numeric: tabular-nums; }
-  .chart { display:flex; align-items:flex-end; gap:3px; height:140px; padding-top:8px; }
-  .bar { flex:1; background:var(--accent); border-radius:3px 3px 0 0; min-height:2px; position:relative; }
-  .bar:hover::after { content: attr(data-tip); position:absolute; bottom:100%; left:50%;
-      transform:translateX(-50%); background:var(--ink); color:#fff; font-size:11px;
-      padding:3px 6px; border-radius:4px; white-space:nowrap; margin-bottom:4px; }
-  .axis { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:4px; }
-  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; }
-  @media (max-width: 700px) { .grid3 { grid-template-columns: 1fr; } }
-  .brk { display:flex; justify-content:space-between; font-size:14px; margin:6px 0 2px; }
-  .track { height:6px; background:var(--accent-soft); border-radius:3px; }
-  .track span { display:block; height:100%; background:var(--accent); border-radius:3px; }
-  code { background:var(--bg); padding:2px 6px; border-radius:4px; word-break:break-all; }
-</style>
-
-<div class="card top">
-  <div class="qr">
-    <img src="{{ url_for('qr_png', slug=code.slug) }}" alt="QR code">
-    <p style="margin-top:12px"><a class="btn" href="{{ url_for('qr_png', slug=code.slug, download=1) }}">Download PNG</a></p>
+<div class="wrap stats-page">
+  <a class="back" href="{{ url_for('dashboard') }}">‹ My QR codes</a>
+  <div class="title">
+    <h1>{{ code.name or 'QR code ' ~ code.slug }}</h1>
+    <p class="muted">Opens <a href="{{ code.target_url }}" target="_blank" rel="noopener noreferrer">{{ code.target_url }}</a></p>
   </div>
-  <div>
-    <h2 style="margin-bottom:4px">{{ code.name or code.slug }}</h2>
-    <p class="muted" style="margin:0">Goes to <a href="{{ code.target_url }}" target="_blank" rel="noopener">{{ code.target_url }}</a></p>
-    <p class="muted" style="margin:4px 0 0">Tracking link inside the QR: <code>{{ short_url }}</code></p>
 
-    <div class="stats">
-      <div class="stat"><span class="muted">Total scans</span><b>{{ totals.total }}</b></div>
-      <div class="stat"><span class="muted">Unique scanners</span><b>{{ totals.uniques }}</b></div>
-      <div class="stat"><span class="muted">Last scan (UTC)</span>
-        <b style="font-size:15px;padding-top:8px">{{ (totals.last_scan or '—')[:16].replace('T',' ') }}</b></div>
+  <div class="top">
+    <section class="panel qr" aria-label="QR code image">
+      <img src="{{ url_for('qr_png', slug=code.slug) }}" alt="QR code for {{ code.target_url }}" width="260" height="260">
+      <a class="btn wide" href="{{ url_for('qr_png', slug=code.slug, download=1) }}">Download PNG</a>
+      <p class="link">Counting link inside the code
+        <code>{{ short_url }}</code></p>
+    </section>
+
+    <div>
+      <div class="figures">
+        <div class="figure"><div class="label">Total scans</div><div class="value">{{ totals.total }}</div></div>
+        <div class="figure"><div class="label">Unique scanners</div><div class="value">{{ totals.uniques }}</div></div>
+        <div class="figure"><div class="label">Last scan</div>
+          <div class="value when">{% if totals.last_scan %}<time datetime="{{ totals.last_scan }}" data-local>{{ totals.last_scan[:16].replace('T', ' ') }} UTC</time>{% else %}Not scanned yet{% endif %}</div></div>
+      </div>
+
+      <section class="panel chart-panel" aria-labelledby="chart-h">
+        <div class="chart-head">
+          <h2 id="chart-h">Scans per day, last 30 days</h2>
+          <span class="muted small num">Busiest day: {{ max_day if totals.total else 0 }}</span>
+        </div>
+        <div class="chart" role="img" aria-label="Bar chart of scans per day for the last 30 days. Busiest day: {{ max_day if totals.total else 0 }} scans.">
+          {% for d in daily %}
+          <div class="bar{% if not d.n %} zero{% endif %}" style="height:{{ (d.n / max_day * 100)|round(1) }}%"
+               title="{{ d.label }}: {{ d.n }} {{ 'scan' if d.n == 1 else 'scans' }}"></div>
+          {% endfor %}
+        </div>
+        <div class="axis num"><span>{{ daily[0].label }}</span><span>{{ daily[-1].label }} (days counted in UTC)</span></div>
+      </section>
     </div>
+  </div>
 
-    <span class="muted">Scans per day — last 30 days</span>
-    <div class="chart">
-      {% for d in daily %}
-      <div class="bar" style="height:{{ (d.n / max_day * 100)|round(1) }}%" data-tip="{{ d.day }}: {{ d.n }}"></div>
-      {% endfor %}
+  <section class="panel breakdowns" aria-label="Who scanned">
+    {% for title, key in [('Device', 'device'), ('Operating system', 'os'), ('Browser or app', 'browser')] %}
+    <div>
+      <h2>{{ title }}</h2>
+      {% for r in breakdown[key] %}
+        <div class="brk"><span>{{ r.label }}</span><span class="num muted">{{ r.n }}</span></div>
+        <div class="track"><span style="width:{{ (r.n / totals.total * 100)|round(1) }}%"></span></div>
+      {% else %}<p class="muted small" style="margin-top:10px">No scans yet.</p>{% endfor %}
     </div>
-    <div class="axis"><span>{{ daily[0].day }}</span><span>{{ daily[-1].day }}</span></div>
-  </div>
-</div>
-
-<div class="card grid3">
-  {% for title, key in [('Device','device'), ('Operating system','os'), ('Browser / app','browser')] %}
-  <div>
-    <h2>{{ title }}</h2>
-    {% for r in breakdown[key] %}
-      <div class="brk"><span>{{ r.label }}</span><span class="num">{{ r.n }}</span></div>
-      <div class="track"><span style="width:{{ (r.n / totals.total * 100)|round(1) }}%"></span></div>
-    {% else %}<p class="muted">No scans yet.</p>{% endfor %}
-  </div>
-  {% endfor %}
-</div>
-
-<div class="card">
-  <h2>Recent scans</h2>
-  {% if recent %}
-  <div class="table-wrap"><table>
-    <tr><th>Time (UTC)</th><th>Device</th><th>OS</th><th>Browser</th><th>Visitor</th></tr>
-    {% for s in recent %}
-    <tr><td>{{ s.scanned_at[:19].replace('T',' ') }}</td><td>{{ s.device }}</td><td>{{ s.os }}</td>
-        <td>{{ s.browser }}</td><td class="muted">{{ s.visitor[:8] }}</td></tr>
     {% endfor %}
-  </table></div>
-  {% else %}
-  <p class="muted">Nobody has scanned this code yet. Scan it with your phone to test.</p>
-  {% endif %}
-</div>
+  </section>
 
-<form method="post" action="{{ url_for('delete', slug=code.slug) }}"
-      onsubmit="return confirm('Delete this QR code and all its scan data?')">
-  <button class="btn danger" type="submit">Delete this QR code</button>
-</form>
+  <section class="panel recent" aria-labelledby="recent-h">
+    <h2 id="recent-h">Latest scans</h2>
+    {% if recent %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>When</th><th>Device</th><th>Operating system</th><th>Browser or app</th></tr></thead>
+      <tbody>
+      {% for s in recent %}
+      <tr><td><time datetime="{{ s.scanned_at }}" data-local>{{ s.scanned_at[:16].replace('T', ' ') }} UTC</time></td>
+          <td>{{ s.device }}</td><td>{{ s.os }}</td><td>{{ s.browser }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+    <p class="muted" style="margin-top:10px">Nobody has scanned this code yet. Scan it with your own phone to check that it works.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel remove" aria-labelledby="remove-h">
+    <div>
+      <h2 id="remove-h">Delete this QR code</h2>
+      <p>Printed copies will stop working, and the scan history is erased. This can't be undone.</p>
+    </div>
+    <form method="post" action="{{ url_for('delete', slug=code.slug) }}" data-confirm>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn danger" type="submit">Delete QR code</button>
+    </form>
+  </section>
+</div>
+<script>
+  document.querySelector("form[data-confirm]").addEventListener("submit", function (e) {
+    if (!confirm("Delete this QR code and its scan history? Printed copies will stop working.")) e.preventDefault();
+  });
+</script>
 {% endblock %}

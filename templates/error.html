@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · QR Tracker{% endblock %}
+{% block style %}
+  .oops { max-width: 520px; padding-top: 72px; text-align: center; }
+  .oops p { color: var(--muted); margin-top: 10px; }
+  .oops .btn { margin-top: 24px; }
+{% endblock %}
+{% block content %}
+<section class="wrap oops">
+  <h1>{{ title }}</h1>
+  <p>{{ detail }}</p>
+  <a class="btn" href="{{ url_for('index') }}">{% if user %}Go to my QR codes{% else %}Go to the home page{% endif %}</a>
+</section>
+{% endblock %}
